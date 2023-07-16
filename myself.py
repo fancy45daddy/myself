@@ -1,4 +1,4 @@
-import aiohttp.web, asyncio, bs4, urllib.parse, fake_useragent, tempfile, sys, re, huggingface_hub, pathlib, builtins, zhconv, argparse, itertools
+import aiohttp.web, asyncio, bs4, urllib.parse, fake_useragent, tempfile, sys, re, huggingface_hub, pathlib, builtins, zhconv, argparse, os, itertools
 
 parser = argparse.ArgumentParser()
 parser.add_argument('huggingface')
