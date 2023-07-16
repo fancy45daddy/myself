@@ -17,7 +17,7 @@ async def main():
         async with client.get('https://myself-bbs.com/forum.php?mod=viewthread&tid=44834&extra=page%3D1%26filter%3Dtypeid%26typeid%3D431%26typeid%3D431') as episode:
             html = bs4.BeautifulSoup(await episode.text(), 'lxml')
             title = zhconv.convert(html.find('title').string.split('【')[0].replace('/ ', ''), 'zh-cn')
-            for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 3, None):
+            for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 0, None):
                 async with client.ws_connect('wss://v.myself-bbs.com/ws') as ws:
                     await ws.send_json({'tid':'','vid':'','id':urllib.parse.urlparse(_.find('a', attrs={'data-href':True}).get('data-href')).path.split('/')[-1]})
                     video = 'https:' + (await ws.receive_json()).get('video')
