@@ -1,4 +1,4 @@
-import aiohttp.web, asyncio, bs4, urllib.parse, fake_useragent, tempfile, sys, re, huggingface_hub, pathlib, builtins, zhconv, argparse
+import aiohttp.web, asyncio, bs4, urllib.parse, fake_useragent, tempfile, sys, re, huggingface_hub, pathlib, builtins, zhconv, argparse, itertools
 
 parser = argparse.ArgumentParser()
 parser.add_argument('huggingface')
@@ -16,8 +16,8 @@ async def main():
     async with aiohttp.ClientSession(headers={'user-agent':fake_useragent.UserAgent().chrome}) as client:
         async with client.get('https://myself-bbs.com/thread-49580-1-1.html') as episode:
             html = bs4.BeautifulSoup(await episode.text(), 'lxml')
-            title = zhconv.convert(html.find('title').string.split('【')[0], 'zh-cn')
-            for _ in html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False):
+            title = zhconv.convert(html.find('title').string.split('【')[0].replace('/ ', ''), 'zh-cn')
+            for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 3, None):
                 async with client.ws_connect('wss://v.myself-bbs.com/ws') as ws:
                     await ws.send_json({'tid':'','vid':'','id':urllib.parse.urlparse(_.find('a', attrs={'data-href':True}).get('data-href')).path.split('/')[-1]})
                     video = 'https:' + (await ws.receive_json()).get('video')
