@@ -14,12 +14,16 @@ async def main():
     site = aiohttp.web.TCPSite(runner, '0.0.0.0', 8000)
     await site.start()
     async with aiohttp.ClientSession(headers={'user-agent':fake_useragent.UserAgent().chrome}) as client:
-        async with client.get('https://myself-bbs.com/forum.php?mod=viewthread&tid=44835&highlight=%E9%A0%AD%E6%96%87%E5%AD%97D') as episode:
+        async with client.get('https://myself-bbs.com/thread-42278-1-1.html') as episode:
             html = bs4.BeautifulSoup(await episode.text(), 'lxml')
             title = zhconv.convert(re.split('[／【]', html.find('title').string)[0].replace(' ', ''), 'zh-cn')
             for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 0, None):
                 async with client.ws_connect('wss://v.myself-bbs.com/ws') as ws:
-                    await ws.send_json({'tid':'','vid':'','id':urllib.parse.urlparse(_.find('a', attrs={'data-href':True}).get('data-href')).path.split('/')[-1]})
+                    href = urllib.parse.urlparse(_.find('a', attrs={'data-href':True}).get('data-href')).path
+                    if 'play/' in href:
+                        tid, vid = href.split('/')[-2:]
+                        await ws.send_json({'tid':tid,'vid':vid,'id':''})
+                    else: await ws.send_json({'tid':'','vid':'','id':href.split('/')[-1]})
                     video = 'https:' + (await ws.receive_json()).get('video')
                     async with client.get(video, headers={'referer':'https://v.myself-bbs.com'}) as m3u8:
                         pathlib.Path('index.m3u8').write_bytes(re.sub(b'^\d+\.ts$', lambda _:b'/'.join((video.rsplit('/', 1)[0].encode(),  _.group(0))), await m3u8.content.read(), flags=re.MULTILINE))
