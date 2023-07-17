@@ -27,7 +27,6 @@ async def main():
                     video = 'https:' + (await ws.receive_json()).get('video')
                     async with client.get(video, headers={'referer':'https://v.myself-bbs.com'}) as m3u8:
                         pathlib.Path(__file__).parent.joinpath('index.m3u8').write_bytes(re.sub(b'^[^#]\w+\.ts$', lambda _:b'/'.join((video.rsplit('/', 1)[0].encode(),  _.group(0))), await m3u8.content.read(), flags=re.MULTILINE))
-                        print(pathlib.Path(__file__).parent.joinpath('index.m3u8').read_text())
                         with tempfile.NamedTemporaryFile(delete=False) as tmp:
                             sys.modules[__name__].unlink += tmp.name,
                             ffmpeg = await asyncio.create_subprocess_exec('ffmpeg', '-y', '-headers', 'referer:https://v.myself-bbs.com', '-protocol_whitelist', 'pipe,https,tls,tcp,http', '-i', 'http://localhost:8000/index.m3u8', '-f', 'mp4', tmp.name)
