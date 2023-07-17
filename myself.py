@@ -14,10 +14,10 @@ async def main():
     site = aiohttp.web.TCPSite(runner, '0.0.0.0', 8000)
     await site.start()
     async with aiohttp.ClientSession(headers={'user-agent':fake_useragent.UserAgent().chrome}) as client:
-        async with client.get('https://myself-bbs.com/thread-42278-1-1.html') as episode:
+        async with client.get('https://myself-bbs.com/forum.php?mod=viewthread&tid=44834&highlight=%E9%A0%AD%E6%96%87%E5%AD%97D') as episode:
             html = bs4.BeautifulSoup(await episode.text(), 'lxml')
             title = zhconv.convert(re.split('[／【]', html.find('title').string)[0].replace(' ', ''), 'zh-cn')
-            for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 0, None):
+            for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 25, None):
                 async with client.ws_connect('wss://v.myself-bbs.com/ws') as ws:
                     href = urllib.parse.urlparse(_.find('a', attrs={'data-href':True}).get('data-href')).path
                     if 'play/' in href:
@@ -32,7 +32,8 @@ async def main():
                             ffmpeg = await asyncio.create_subprocess_exec('ffmpeg', '-y', '-headers', 'referer:https://v.myself-bbs.com', '-protocol_whitelist', 'pipe,https,tls,tcp,http', '-i', 'http://localhost:8000/index.m3u8', '-f', 'mp4', tmp.name)
                             await ffmpeg.wait()
                             api = huggingface_hub.HfApi()
-                            api.upload_file(path_or_fileobj=tmp.name, path_in_repo=''.join((title, '/', _.find('a', attrs={'href':'javascript:;'}).string.split()[1], '.mp4')), repo_id='chaowenguo/video', repo_type='model', run_as_future=True)
+                            futrue = api.upload_file(path_or_fileobj=tmp.name, path_in_repo=''.join((title, '/', _.find('a', attrs={'href':'javascript:;'}).string.split()[1], '.mp4')), repo_id='chaowenguo/video', repo_type='model', run_as_future=True)
+    return future
 
-asyncio.run(main())
+asyncio.run(main()).result()
 for _ in unlink: os.unlink(_)
