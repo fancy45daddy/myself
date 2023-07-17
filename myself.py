@@ -14,7 +14,7 @@ async def main():
     site = aiohttp.web.TCPSite(runner, '0.0.0.0', 8000)
     await site.start()
     async with aiohttp.ClientSession(headers={'user-agent':fake_useragent.UserAgent().chrome}) as client:
-        async with client.get('https://myself-bbs.com/forum.php?mod=viewthread&tid=44834&extra=page%3D1%26filter%3Dtypeid%26typeid%3D431%26typeid%3D431') as episode:
+        async with client.get('https://myself-bbs.com/forum.php?mod=viewthread&tid=44836&highlight=%E9%A0%AD%E6%96%87%E5%AD%97D') as episode:
             html = bs4.BeautifulSoup(await episode.text(), 'lxml')
             title = zhconv.convert(re.split('[／【]', html.find('title').string)[0].replace('/ ', ''), 'zh-cn')
             for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 0, None):
