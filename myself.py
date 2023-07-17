@@ -16,7 +16,7 @@ async def main():
     async with aiohttp.ClientSession(headers={'user-agent':fake_useragent.UserAgent().chrome}) as client:
         async with client.get('https://myself-bbs.com/forum.php?mod=viewthread&tid=44843&highlight=%E9%A0%AD%E6%96%87%E5%AD%97D') as episode:
             html = bs4.BeautifulSoup(await episode.text(), 'lxml')
-            title = zhconv.convert(re.split('[／【]', html.find('title').string)[0].replace('/ ', ''), 'zh-cn')
+            title = zhconv.convert(re.split('[／【]', html.find('title').string)[0].replace(' ', ''), 'zh-cn')
             for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 0, None):
                 async with client.ws_connect('wss://v.myself-bbs.com/ws') as ws:
                     await ws.send_json({'tid':'','vid':'','id':urllib.parse.urlparse(_.find('a', attrs={'data-href':True}).get('data-href')).path.split('/')[-1]})
