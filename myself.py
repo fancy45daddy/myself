@@ -25,6 +25,7 @@ async def main():
                         await ws.send_json({'tid':tid,'vid':vid,'id':''})
                     else: await ws.send_json({'tid':'','vid':'','id':href.split('/')[-1]})
                     video = 'https:' + (await ws.receive_json()).get('video')
+                    print(video)
                     async with client.get(video, headers={'referer':'https://v.myself-bbs.com'}) as m3u8:
                         pathlib.Path(__file__).parent.joinpath('index.m3u8').write_bytes(re.sub(b'^[^#]\w+\.ts$', lambda _:b'/'.join((video.rsplit('/', 1)[0].encode(),  _.group(0))), await m3u8.content.read(), flags=re.MULTILINE))
                         with tempfile.NamedTemporaryFile(delete=False) as tmp:
