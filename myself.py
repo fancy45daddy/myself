@@ -17,7 +17,7 @@ async def main():
         async with client.get('https://myself-bbs.com/forum.php?mod=viewthread&tid=48795&extra=page%3D1%26filter%3Dtypeid%26typeid%3D147%26typeid%3D147') as episode:
             html = bs4.BeautifulSoup(await episode.text(), 'lxml')
             title = zhconv.convert(re.split('[／【]', html.find('title').string)[0].replace(' ', ''), 'zh-cn')
-            for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 0, None):
+            for _ in itertools.islice(html.find('ul', attrs={'class', 'main_list'}).find_all('li', recursive=False), 1, None):
                 async with client.ws_connect('wss://v.myself-bbs.com/ws') as ws:
                     href = urllib.parse.urlparse(_.find('a', attrs={'data-href':True}).get('data-href')).path
                     if 'play/' in href:
