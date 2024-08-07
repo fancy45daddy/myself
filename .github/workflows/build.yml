@@ -1,0 +1,11 @@
+on: push
+
+jobs:
+    back:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@main
+        - run: |
+              sudo apt install -y --no-install-recommends python3-aiohttp python3-bs4 python3-lxml ffmpeg
+              python3 -m pip install -U zhconv huggingface_hub fake_useragent
+              python3 myself.py ${{secrets.huggingface}}
